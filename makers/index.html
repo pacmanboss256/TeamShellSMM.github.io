@@ -3,6 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <title>#TeamShell Makers</title>
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+<link rel="manifest" href="/assets/site.webmanifest">
+<link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#01a19f">
+<link rel="shortcut icon" href="/assets/favicon.ico">
+<meta name="msapplication-TileColor" content="#01a19f">
+<meta name="msapplication-config" content="/assets/browserconfig.xml">
+<meta name="theme-color" content="#01a19f">
 
 <link href="https://fonts.googleapis.com/css?family=Bangers&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css"/>
@@ -10,7 +19,7 @@
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.2/bootstrap3-typeahead.min.js" rel="stylesheet">
 <link href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.dataTables.min.css" rel="stylesheet"/>
-<link href="../assets/teamshell.css" rel="stylesheet">
+<link href="../assets/teamshell.css?v=1.0.5" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
@@ -18,50 +27,14 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.2/bootstrap3-typeahead.js"></script>
 <script src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.js"></script>
+<script src="../assets/script.js?v=0.0.1"></script>
 
 <script>
-function ObjectLength_Modern( object ) {
-    if(!object) return 0
-    return Object.keys(object).length;
-}
-
-function ObjectLength_Legacy( object ) {
-    if(!object) return 0
-    var length = 0;
-    for( var key in object ) {
-        if( object.hasOwnProperty(key) ) {
-            ++length;
-        }
-    }
-    return length;
-}
-
-var ObjectLength = Object.keys ? ObjectLength_Modern : ObjectLength_Legacy;
-
   var first_load = true;
   var data,level_headers,tag_labels,clears,raw_data,comp_winners;
   var current_season = 1;
-  var params=new URLSearchParams(window.location.search)
 
-
-  function setDark(val){
-    if(val){
-      localStorage.setItem("dark","1")
-    } else {
-      localStorage.removeItem("dark")
-    }
-  }
-
-  if(params.get("dark")){
-    setDark(params.get("dark")==="1")
-  } 
-  
-  function makeDark(){
-      document.getElementsByTagName("html")[0].className=localStorage.getItem("dark")==="1"?"dark":""
-  }
-
-  makeDark()
 
 function sum(obj){
   if(!obj) return 0
@@ -168,12 +141,14 @@ function get_maker_points(likes, clears, difficultyPoints){
     }
 
     for(var i=0;i<data.played.length;i++){
-      if(levels[data.played[i][0]]){
+      var current_level=data.played[i][0]
+      var current_creator=data.played[i][1]
+      if(levels[current_level] && levels[current_level].creator!=current_creator){
         if(data.played[i][4] == "1"){
-          levels[data.played[i][0]]["likes"] = levels[data.played[i][0]]["likes"] ? levels[data.played[i][0]]["likes"] + 1 : 1;
+          levels[current_level]["likes"] = levels[current_level]["likes"] ? levels[current_level]["likes"] + 1 : 1;
         }
         if(data.played[i][2] == "1"){
-          levels[data.played[i][0]]["clears"] = levels[data.played[i][0]]["clears"] ? levels[data.played[i][0]]["clears"] + 1 : 1;
+          levels[current_level]["clears"] = levels[current_level]["clears"] ? levels[current_level]["clears"] + 1 : 1;
         }        
       }
     }
@@ -269,79 +244,10 @@ function get_maker_points(likes, clears, difficultyPoints){
     
     datatable.draw();
     $('[data-toggle="tooltip"],.copy,#refresh,#submitButton').tooltip()
-    $('.copy').click(function(){
-     var code=$(this).parent().text().substring(0,11);
-     var old_title="Copy tsclear code"
-     var new_title="Code copied."
-     
-     $(this).addClass("text-success")
-      $(this).tooltip('hide')
-          .attr('title', new_title)
-          .attr('data-original-title', new_title)
-          .tooltip('update')
-          .tooltip('show')
-      var temp=this
-     
-     setTimeout(function(){
-      $(temp).removeClass("text-success")
-       $(temp).tooltip('hide')
-          .attr('title', old_title)
-          .attr('data-original-title', old_title)
-          .tooltip('update')
-          .tooltip('enable')
-     },2000)
-    copyClipboard(code)
-  })
-
-  }
-function copyClipboard(str){
-  const el = document.createElement('textarea');
-  el.value = "!tsclear "+str;
-  document.body.appendChild(el);
-  el.select();
-  document.execCommand('copy');
-  document.body.removeChild(el);
-
-}
-
-
-  
-
-
-  function store_input(query_name,obj){
-    if(params.get(query_name)){
-      localStorage.setItem(query_name,params.get(query_name))
-      $(obj).val(params.get(query_name))
-    } else if(localStorage.getItem(query_name)){
-      $(obj).val(localStorage.getItem(query_name))
-    } else {
-      localStorage.setItem(query_name,$(obj).val())
-    }
-  }
-  
-  function get_input(query_name){
-    return localStorage.getItem(query_name)
   }
 
-  function setGetParam(key,value) {
-    localStorage.setItem(key,value)
-    if (history.pushState) {
-      var params = new URLSearchParams(window.location.search);
-      params.set(key, value);
-      var newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?' + params.toString();
-      window.history.pushState({path:newUrl},'',newUrl);
-    }
-  }
 
   $(function(){
-
-    $("#darkmode").change(function(){
-      setDark($(this).prop("checked"))
-      makeDark()
-    }).prop("checked",localStorage.getItem("dark"))
-
-
-
     store_input('membershipStatus','#membershipStatus')
 
 
@@ -373,25 +279,26 @@ function copyClipboard(str){
       "columnDefs": [
          {
             "render": function ( data, type, row ) {
+                    if(type!="display") return data
                     return "<div class='points'>"+data+"</div>"
                 },
-                //"orderable": false,
                 targets:7,
             },
             {
             "render": function ( data, type, row ) {
                     return data+"%"
                 },
-                //"orderable": false,
                 targets:6,
             },
             { "render": function ( data, type, row ) {
+                    if(type!="display") return data
                     let goldsHtml = "";
                     let silversHtml = "";
                     let bronzesHtml = "";
                     let ironsHtml = "";
 
                     for(var i = 0; i < comp_winners.length; i++){
+                      //return "<div class='points'><a href='../levels/?creator="+encodeURI(data)+"' target='_blank'>"+data+"</a></div>"
                       if(data == comp_winners[i][1]){
                         switch(comp_winners[i][3]){
                           case "1":
@@ -424,7 +331,7 @@ function copyClipboard(str){
                       medalsHtml += '<div class="medals">' + ironsHtml + '</div>';
                     }  
 
-                    return data + medalsHtml;
+                    return "<a href='../levels/?creator="+encodeURI(data)+"' target='_blank'>"+data + "</a>"+medalsHtml;
                 },
                 targets: 0
             },
@@ -438,15 +345,19 @@ function copyClipboard(str){
             //{ "visible": false,  "targets": [ 3 ] }
     })
 
-
 function getData(){
     var datatable=$('#table').DataTable()
     datatable.clear().draw();
-    $.getJSON("https://script.google.com/macros/s/AKfycbwOZQzoqLRYbwSoTYWgJeT1A-YKfDKJf_2jqNBm5qmr_BncNL8/exec?callback=?").done(function(_data){
-    raw_data=JSON.stringify(_data)
-
-    refresh()
-  })
+    loadTeamshellApi(function(_rawData,dataNoChange){
+      if(dataNoChange){
+        $.notify("No new data was loaded",{
+          className:"success",
+          position:"top right",
+        });
+      }
+      raw_data=_rawData
+      refresh()
+    })
 }
 
 getData()
